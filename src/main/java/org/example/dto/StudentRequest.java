@@ -1,12 +1,3 @@
 package org.example.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-public class StudentRequest {
-    private String name;
-    private String surname;
-    private Long groupId;
-}
+public record StudentRequest(String name, String surname, Long groupId) {}

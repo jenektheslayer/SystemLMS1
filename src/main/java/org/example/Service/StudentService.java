@@ -5,10 +5,15 @@ import lombok.AllArgsConstructor;
 import org.example.Exception.StudentNotFoundException;
 import org.example.dao.GroupRepository;
 import org.example.dao.StudentRepository;
+import org.example.dto.PagedResponse;
 import org.example.dto.StudentRequest;
 import org.example.dto.StudentResponse;
+import org.example.mapper.StudentMapper;
 import org.example.model.Group;
 import org.example.model.Student;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,19 +24,20 @@ import java.util.List;
 public class StudentService {
     private final StudentRepository studentRepository;
     private final GroupRepository groupRepository;
+    private final StudentMapper studentMapper;
 
     @Transactional
     public StudentResponse addStudent(StudentRequest request) {
-        Student student = new Student();
-        student.setName(request.getName());
-        student.setSurname(request.getSurname());
+
+        Long groupId = request.groupId();
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupNotFoundException());
+
+        Student student = studentMapper.toEntity(request);
+        student.setGroup(group);
         student = studentRepository.save(student);
 
-        StudentResponse response = new StudentResponse();
-        response.setId(student.getId());
-        response.setName(request.getName());
-        response.setSurname(request.getSurname());
-        response.setGroupId(null);
+        StudentResponse response = studentMapper.toDto(student);
 
         return response;
     }
@@ -47,60 +53,37 @@ public class StudentService {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new StudentNotFoundException("студент не найден" + id));
 
-        StudentResponse response = new StudentResponse();
-        response.setId(student.getId());
-        response.setName(student.getName());
-        response.setSurname(student.getSurname());
-        if (student.getGroup() != null) {
-            response.setGroupId(student.getGroup().getId());
-        } else {
-            response.setGroupId(null);
-        }
+        StudentResponse response = studentMapper.toDto(student);
+
+        return response;
     }
 
-    public List<StudentResponse> getAllStudents() {
-        List<Student> students = studentRepository.findAll();
-        List<StudentResponse> responses = new ArrayList<>();
-
-        for (Student student : students ) {
-            StudentResponse response = new StudentResponse();
-            response.setId(student.getId());
-            response.setName(student.getName());
-            response.setSurname(student.getSurname());
-            if (student.getGroup() != null) {
-                response.setGroupId(student.getGroup().getId());
-            } else {
-                response.setGroupId(null);
-            }
-            responses.add(response);
-        }
-        return responses;
+    public PagedResponse<StudentResponse> getAllStudents(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Student> studentPage = studentRepository.findAll(pageable);
+        List<Student> students = studentPage.getContent();
+        List<StudentResponse> content = studentMapper.toDtoList(students);
+        return new PagedResponse<>(
+                content,
+                studentPage.getNumber(),
+                studentPage.getSize(),
+                studentPage.getTotalElements(),
+                studentPage.getTotalPages()
+        );
     }
 
     @Transactional
     public StudentResponse updateStudent(Long id, StudentRequest request) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(()-> new StudentNotFoundException("студент не найден" + id));
-        if (request.getName() != null) {
-            student.setName(request.getName());
-        }
-        if (request.getSurname() != null) {
-            student.setSurname(request.getSurname());
-        }
-        if (request.getGroupId() != null) {
-            Group group = groupRepository.findById(request.getGroupId())
+        studentMapper.updateEntity(request, student);
+        if (request.groupId() != null) {
+            Group group = groupRepository.findById(request.groupId())
                     .orElseThrow(() -> new GroupNotFoundException("Группа не найдена"));
             student.setGroup(group);
         }
         student = studentRepository.save(student);
-
-        StudentResponse response = new StudentResponse();
-        response.setId(student.getId());
-        response.setName(student.getName());
-        response.setSurname(student.getSurname());
-        if (student.getGroup() != null) {
-            response.setGroupId(student.getGroup().getId());
-        } else response.setGroupId(null);
+        StudentResponse response = studentMapper.toDto(student);
 
         return response;
     }
@@ -119,20 +102,10 @@ public class StudentService {
                 throw new StudentAlreadyInGroupException("Студент уже находится в другой группе")
             }
             student = studentRepository.save(student);
-            StudentResponse response = new StudentResponse();
-            response.setId(student.getId());
-            response.setName(student.getName());
-            response.setSurname(student.getSurname());
-            response.setGroupId(student.getGroup().getId());
+            StudentResponse response = studentMapper.toDto(student);
 
             responses.add(response);
         }
         return responses;
     }
-
-
-
-
-
-
 }
