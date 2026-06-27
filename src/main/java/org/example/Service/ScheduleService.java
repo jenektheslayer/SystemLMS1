@@ -8,7 +8,6 @@ import org.example.dao.TeacherRepository;
 import org.example.dto.PagedResponse;
 import org.example.dto.ScheduleRequest;
 import org.example.dto.ScheduleResponse;
-import org.example.dto.StudentResponse;
 import org.example.mapper.ScheduleMapper;
 import org.example.model.*;
 import org.springframework.data.domain.Page;
@@ -40,6 +39,9 @@ public class ScheduleService {
         schedule.setGroup(group);
         Teacher teacher = course.getTeacher();
         schedule.setTeacher(teacher);
+        if (scheduleRepository.existsByTeacherIdAndDateTime(teacher.getId(), request.dateTime())) {
+            throw new TeacherNotAvailableException("Учитель занят в это время");
+        }
         schedule = scheduleRepository.save(schedule);
         ScheduleResponse response = scheduleMapper.toDto(schedule);
         return response;
@@ -111,7 +113,13 @@ public class ScheduleService {
             schedule.setCourse(course);
             schedule.setTeacher(course.getTeacher());
         }
-
+        if (scheduleRepository.existsByTeacherIdAndDateTimeAndIdNot(
+                schedule.getTeacher().getId(),
+                schedule.getDateTime(),
+                id))
+        {
+            throw new TeacherNotAvailableException("Учитель занят в это время");
+        }
         schedule = scheduleRepository.save(schedule);
 
         ScheduleResponse response = scheduleMapper.toDto(schedule);

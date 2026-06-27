@@ -1,6 +1,5 @@
 package org.example.Service;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.example.dao.GroupRepository;
 import org.example.dao.StudentRepository;
@@ -20,6 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class GroupService {
+
     private final GroupRepository groupRepository;
     private final StudentRepository studentRepository;
     private final GroupMapper groupMapper;

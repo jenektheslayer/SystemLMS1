@@ -1,6 +1,5 @@
 package org.example.Service;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.example.Exception.StudentNotFoundException;
 import org.example.dao.GroupRepository;
@@ -33,7 +32,7 @@ public class StudentService {
 
         Long groupId = request.groupId();
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundException());
+                .orElseThrow(() -> new GroupNotFoundException("Группа не найдена"));
 
         Student student = studentMapper.toEntity(request);
         student.setGroup(group);

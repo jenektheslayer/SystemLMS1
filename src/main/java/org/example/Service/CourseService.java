@@ -1,6 +1,5 @@
 package org.example.Service;
 
-
 import lombok.RequiredArgsConstructor;
 import org.example.dao.CourseRepository;
 import org.example.dao.ScheduleRepository;
@@ -8,16 +7,12 @@ import org.example.dao.TeacherRepository;
 import org.example.dto.CourseRequest;
 import org.example.dto.CourseResponse;
 import org.example.dto.PagedResponse;
-import org.example.dto.StudentResponse;
 import org.example.mapper.CourseMapper;
 import org.example.model.Course;
-import org.example.model.Schedule;
-import org.example.model.Student;
 import org.example.model.Teacher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +21,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CourseService {
+
     private final CourseRepository courseRepository;
     private final TeacherRepository teacherRepository;
     private final CourseMapper courseMapper;
