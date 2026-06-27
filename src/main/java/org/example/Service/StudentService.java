@@ -1,7 +1,7 @@
 package org.example.Service;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.Exception.StudentNotFoundException;
 import org.example.dao.GroupRepository;
 import org.example.dao.StudentRepository;
@@ -15,13 +15,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class StudentService {
+
     private final StudentRepository studentRepository;
     private final GroupRepository groupRepository;
     private final StudentMapper studentMapper;
@@ -40,13 +42,6 @@ public class StudentService {
         StudentResponse response = studentMapper.toDto(student);
 
         return response;
-    }
-
-    @Transactional
-    public void deleteStudent(Long id) {
-        Student student = studentRepository.findById(id)
-                .orElseThrow(() -> new StudentNotFoundException("студент не найден" + id));
-        studentRepository.delete(student);
     }
 
     public StudentResponse getStudentById(Long id) {
@@ -107,5 +102,12 @@ public class StudentService {
             responses.add(response);
         }
         return responses;
+    }
+
+    @Transactional
+    public void deleteStudent(Long id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException("студент не найден" + id));
+        studentRepository.delete(student);
     }
 }

@@ -1,30 +1,28 @@
 package org.example.Service;
 
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.dao.GroupRepository;
 import org.example.dao.StudentRepository;
 import org.example.dto.GroupRequest;
 import org.example.dto.GroupResponse;
 import org.example.dto.PagedResponse;
-import org.example.dto.StudentResponse;
 import org.example.mapper.GroupMapper;
 import org.example.model.Group;
-import org.example.model.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GroupService {
-    private GroupRepository groupRepository;
-    private StudentRepository studentRepository;
-    private GroupMapper groupMapper;
+    private final GroupRepository groupRepository;
+    private final StudentRepository studentRepository;
+    private final GroupMapper groupMapper;
 
     @Transactional
     public GroupResponse addGroup(GroupRequest request) {
@@ -62,7 +60,7 @@ public class GroupService {
     @Transactional
     public GroupResponse updateGroup(Long id, GroupRequest request) {
         Group group = groupRepository.findById(id)
-                .orElseThrow(() -> new GroupNotFoundException());
+                .orElseThrow(() -> new GroupNotFoundException("Группа не найдена"));
         groupMapper.updateEntity(request, group);
 
         group = groupRepository.save(group);
@@ -74,7 +72,7 @@ public class GroupService {
     @Transactional
     public void deleteGroup(Long id) {
         Group group = groupRepository.findById(id)
-                .orElseThrow(() -> new GroupNotFoundException());
+                .orElseThrow(() -> new GroupNotFoundException("Группа не найдена"));
         if (studentRepository.existsByGroupId(id)) {
             throw new GroupHasStudentsException("Нельзя удалить группу, в ней есть студенты");
         }
