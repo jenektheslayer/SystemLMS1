@@ -9,4 +9,3 @@ databaseChangeLog:
       file: db/changelog/changes/004-create-students.yml
   - include:
       file: db/changelog/changes/005-create-schedules.yml
-
