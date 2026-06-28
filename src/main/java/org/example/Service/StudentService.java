@@ -1,7 +1,9 @@
 package org.example.Service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.Exception.StudentNotFoundException;
+import org.example.exception.GroupNotFoundException;
+import org.example.exception.StudentAlreadyInGroupException;
+import org.example.exception.StudentNotFoundException;
 import org.example.dao.GroupRepository;
 import org.example.dao.StudentRepository;
 import org.example.dto.PagedResponse;
@@ -93,7 +95,7 @@ public class StudentService {
             if (student.getGroup() == null) {
                 student.setGroup(group);
             } else {
-                throw new StudentAlreadyInGroupException("Студент уже находится в другой группе")
+                throw new StudentAlreadyInGroupException("Студент уже находится в другой группе");
             }
             student = studentRepository.save(student);
             StudentResponse response = studentMapper.toDto(student);

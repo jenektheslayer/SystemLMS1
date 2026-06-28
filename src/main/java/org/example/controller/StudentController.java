@@ -8,13 +8,12 @@ import org.example.dto.StudentRequest;
 import org.example.dto.StudentResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.ResponseErrorHandler;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/students")
+@RequestMapping("/api/v1/students")
 public class StudentController {
 
     private final StudentService studentService;

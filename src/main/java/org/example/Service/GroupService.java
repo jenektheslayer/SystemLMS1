@@ -6,6 +6,8 @@ import org.example.dao.StudentRepository;
 import org.example.dto.GroupRequest;
 import org.example.dto.GroupResponse;
 import org.example.dto.PagedResponse;
+import org.example.exception.GroupHasStudentsException;
+import org.example.exception.GroupNotFoundException;
 import org.example.mapper.GroupMapper;
 import org.example.model.Group;
 import org.springframework.data.domain.Page;

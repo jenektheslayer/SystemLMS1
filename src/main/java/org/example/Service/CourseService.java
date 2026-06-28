@@ -7,6 +7,9 @@ import org.example.dao.TeacherRepository;
 import org.example.dto.CourseRequest;
 import org.example.dto.CourseResponse;
 import org.example.dto.PagedResponse;
+import org.example.exception.CourseHasScheduleException;
+import org.example.exception.CourseNotFoundException;
+import org.example.exception.TeacherNotFoundException;
 import org.example.mapper.CourseMapper;
 import org.example.model.Course;
 import org.example.model.Teacher;
@@ -32,7 +35,7 @@ public class CourseService {
 
         Long teacherId = request.teacherId();
         Teacher teacher = teacherRepository.findById(teacherId)
-                .orElseThrow(() -> new TeacherNotFoundException());
+                .orElseThrow(() -> new TeacherNotFoundException("Учитель не найден"));
         Course course = courseMapper.toEntity(request);
         course.setTeacher(teacher);
         course = courseRepository.save(course);

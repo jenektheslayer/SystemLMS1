@@ -6,6 +6,8 @@ import org.example.dao.TeacherRepository;
 import org.example.dto.PagedResponse;
 import org.example.dto.TeacherRequest;
 import org.example.dto.TeacherResponse;
+import org.example.exception.TeacherHasCoursesException;
+import org.example.exception.TeacherNotFoundException;
 import org.example.mapper.TeacherMapper;
 import org.example.model.Teacher;
 import org.springframework.data.domain.Page;
