@@ -1,0 +1,38 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-schedule-table
+      author: andrew
+      changes:
+        - createTable:
+            tableName: schedules
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: group_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_schedule_group
+                    references: groups(id)
+              - column:
+                  name: course_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_schedule_course
+                    references: courses(id)
+              - column:
+                  name: date_time
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: teacher_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_schedule_teacher
+                    references: teachers(id)
