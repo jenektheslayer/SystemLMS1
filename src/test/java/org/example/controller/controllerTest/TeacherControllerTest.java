@@ -1,5 +1,6 @@
-package org.example.controller;
+package org.example.controller.controllerTest;
 
+import org.example.controller.AbstractIT;
 import org.example.dao.TeacherRepository;
 import org.example.dto.PagedResponse;
 import org.example.dto.TeacherRequest;
@@ -9,42 +10,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-class TeacherControllerTest {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("integration-tests-db")
-            .withUsername("test")
-            .withPassword("test");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("spring.liquibase.change-log", () -> "classpath:db/changelog/db.changelog-master.yml");
-    }
-
-    @LocalServerPort
-    private int port;
-
-    private final RestTemplate restTemplate = new RestTemplate();
+class TeacherControllerTest extends AbstractIT {
 
     @Autowired
     private TeacherRepository teacherRepository;
@@ -63,16 +35,12 @@ class TeacherControllerTest {
         teacherRepository.deleteAll();
     }
 
-    private String url(String path) {
-        return "http://localhost:" + port + "/api/v1/teachers" + path;
-    }
-
     @Test
     void shouldCreateTeacher() {
         TeacherRequest request = new TeacherRequest("Татьяна", "Каратаева");
 
         ResponseEntity<TeacherResponse> response = restTemplate.postForEntity(
-                url(""),
+                url("/api/v1/teachers"),
                 request,
                 TeacherResponse.class
         );
@@ -90,7 +58,7 @@ class TeacherControllerTest {
         Teacher teacher = teacherRepository.findAll().get(0);
 
         ResponseEntity<TeacherResponse> response = restTemplate.getForEntity(
-                url("/" + teacher.getId()),
+                url("/api/v1/teachers/" + teacher.getId()),
                 TeacherResponse.class
         );
 
@@ -103,7 +71,7 @@ class TeacherControllerTest {
 
     @Test
     void shouldReturn404WhenTeacherNotFound() {
-        assertThatThrownBy(() -> restTemplate.getForEntity(url("/999"), String.class))
+        assertThatThrownBy(() -> restTemplate.getForEntity(url("/api/v1/teachers/999"), String.class))
                 .isInstanceOfSatisfying(HttpClientErrorException.class,
                         exception -> assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
     }
@@ -111,7 +79,7 @@ class TeacherControllerTest {
     @Test
     void shouldGetAllTeachers() {
         ResponseEntity<PagedResponse> response = restTemplate.getForEntity(
-                url("?page=0&size=10"),
+                url("/api/v1/teachers?page=0&size=10"),
                 PagedResponse.class
         );
 
@@ -131,7 +99,7 @@ class TeacherControllerTest {
         HttpEntity<TeacherRequest> entity = new HttpEntity<>(request, headers);
 
         ResponseEntity<TeacherResponse> response = restTemplate.exchange(
-                url("/" + teacher.getId()),
+                url("/api/v1/teachers/" + teacher.getId()),
                 HttpMethod.PUT,
                 entity,
                 TeacherResponse.class
@@ -143,12 +111,11 @@ class TeacherControllerTest {
         assertThat(body.name()).isEqualTo("Обновлённый");
         assertThat(body.surname()).isEqualTo("Учитель");
     }
-
-    @Test
+@Test
     void shouldDeleteTeacher() {
         Teacher teacher = teacherRepository.findAll().get(0);
 
-        restTemplate.delete(url("/" + teacher.getId()));
+        restTemplate.delete(url("/api/v1/teachers/" + teacher.getId()));
 
         long count = teacherRepository.count();
         assertThat(count).isZero();
